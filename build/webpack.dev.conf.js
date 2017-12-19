@@ -11,6 +11,24 @@ const portfinder = require('portfinder')
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
+const mysql = require('mysql');
+// nodejs开发框架express，用来简化操作
+const express = require('express')
+// 创建node.js的express开发框架的实例
+const app = express();
+ 
+var connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : '123456',
+  database : 'personlist'
+});
+ 
+connection.connect();
+
+var apiRoutes = express.Router();
+app.use('/api', apiRoutes);
+
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
     rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
@@ -20,6 +38,25 @@ const devWebpackConfig = merge(baseWebpackConfig, {
 
   // these devServer options should be customized in /config/index.js
   devServer: {
+    before(app){
+      app.get('/api/tableData', (req, res) => {
+        var  sql = 'SELECT * FROM person';
+        connection.query(sql,function (err, result) {
+          if(err){
+            console.log('[SELECT ERROR] - ',err.message);
+            return;
+          }
+          res.json({data:result}); 
+        });
+      }),
+      apiRoutes.post('/api/deleteItem', function (req, res) { //注意这里改为post就可以了
+        var delSql = 'DELETE FROM person where id=6';
+        res.json({
+          // error: 0,
+          // data: foods
+        });
+      })
+    },
     clientLogLevel: 'warning',
     historyApiFallback: true,
     hot: true,

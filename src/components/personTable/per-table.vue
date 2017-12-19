@@ -2,17 +2,18 @@
 	<div class="per-table">
 		<div class="table-tab">
 			<div class="operate-tab">
-				<Button type="error" class='f-l add-user' @click='addUser'>新增用户</Button>
-				<AutoComplete v-model="searchValue" icon="ios-search"
-			        @on-search="handleSearch" placeholder="Search" class='f-r search'>
-			    </AutoComplete>
+				<Button type="primary" class='f-l add-user' icon="plus" @click='addUser'>新增用户</Button>
+                <div class="search f-r p-r">
+                    <input type="text" v-model="searchValue" @keyup.enter='handleSearch(searchValue)' @input='emptySearch(searchValue)' placeholder='Search'>
+                    <i class="search-btn p-a c-p ivu-icon ivu-icon-ios-search" @click='handleSearch(searchValue)'></i>
+                </div>
 			</div>
 		</div>
 		<div class="tables">
 			<div class="top-pagination ta-r">
 				<Page :total="itemCount" :current='pageNum' :page-size="pageSize" :page-size-opts='opts' placement='bottom' show-total show-elevator show-sizer @on-change="changePage" @on-page-size-change='changePageSize'></Page>
 			</div>
-			<Table border size='large' :columns="columns5" :data="displayData" @on-sort-change='sortChange'></Table>
+			<Table border size='large' :columns="columns" :data="CurrentData" @on-sort-change='sortChange'></Table>
 			<div class="bottom-pagination ta-r">
 				<Page :total="itemCount" :current='pageNum' :page-size="pageSize" :page-size-opts='opts' placement='top' show-total show-elevator show-sizer @on-change="changePage" @on-page-size-change='changePageSize'></Page>
 			</div>
@@ -28,246 +29,139 @@
 		data(){
 			return{
 				isPop:false,
-				searchValue:'',
-				displayData:[],
-				itemCount:0,//总共有多少条数
-				pageSize:5,//当前每页展示的条数
+				searchValue:'',//搜索的值
+				operateData:[],//可进行操作的数据
+				pageSize:10,//当前每页展示的条数
 				pageNum:1,//当前在第几页
-				opts:[5,10,15,20],//每页条数切换的配置
-				columns5: [
+				opts:[10,25,50],//每页条数切换的配置
+                key:'',//排序的关键字
+                order:'',//排序的升降序
+				columns: [
                     {
-                        title: 'Date',
-                        key: 'date',
+                        title: '工号',
+                        key: 'id',
+                        width:100,
                         sortable: 'custom',
                         sortType:'asc'
                     },
                     {
-                        title: 'Name',
+                        title: '姓名',
                         key: 'name',
+                        width:150,
                         sortable: 'custom'
                     },
                     {
-                        title: 'Age',
+                        title: '身份证',
+                        key: 'IDcard',
+                        // width:240,
+                        sortable: 'custom'
+                    },
+                    {
+                        title: '部门',
+                        key: 'department',
+                        sortable: 'custom'
+                    },
+                    {
+                        title: '岗位',
+                        key: 'station',
+                        sortable: 'custom'
+                    },
+                    {
+                        title: '年龄',
                         key: 'age',
+                        width:100,
                         sortable: 'custom'
                     },
                     {
-                        title: 'Address',
-                        key: 'address',
+                        title: '性别',
+                        key: 'sex',
+                        width:100,
                         sortable: 'custom'
+                    },
+                    {
+                        title: '操作',
+                        key: 'action',
+                        width: 200,
+                        align: 'center',
+                        render: (h, params) => {
+                            return h('div', [
+                                h('Button', {
+                                    props: {
+                                        type: 'info',
+                                        size: 'default'
+                                    },
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            console.log(params.index);
+                                        }
+                                    }
+                                }, '编辑'),
+                                h('Button', {
+                                    props: {
+                                        type: 'error',
+                                        size: 'default'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.operateData.splice(params.index,1);
+                                            // this.$http.post('')
+                                        }
+                                    }
+                                }, '删除')
+                            ]);
+                        }
                     }
                 ],
-                tableData: [
-                    {
-                        name: 'John Brown',
-                        age: 18,
-                        address: 'New York No. 1 Lake Park',
-                        date: '2016-10-03'
-                    },
-                    {
-                        name: 'Jim Green',
-                        age: 24,
-                        address: 'London No. 1 Lake Park',
-                        date: '2016-10-01'
-                    },
-                    {
-                        name: 'Joe Black',
-                        age: 30,
-                        address: 'Sydney No. 1 Lake Park',
-                        date: '2016-10-02'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    },
-                    {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park',
-                        date: '2016-10-04'
-                    }
-                ]
+                tableData: []
 			}
 		},
 		created(){
-			this.initData();
+            this.$http.get('/api/tableData').then(function(res){
+                this.tableData = res.body.data;
+                this.initData();
+            })
 		},
+        computed:{
+            CurrentData(){
+                var _start = ( this.pageNum - 1 ) * this.pageSize;
+                var _end = this.pageNum * this.pageSize;
+                return this.operateData.slice(_start,_end);
+            },
+            itemCount(){
+                return this.operateData.length;
+            }
+        },
 		methods:{
-			handleSearch(){
-				console.log(111);
+            // 搜索功能
+			handleSearch(value){
+                var v = value.trim();
+                this.operateData = this.tableData.filter(function(item){
+                    // debugger
+                    for(var key in item){
+                        if(String(item[key])===v){
+                            return item;
+                        }
+                    }
+                });
+                console.log(this.operateData);
+                // 重新排序
+                this.sortChange();
 			},
-			initData(){
-                this.itemCount = this.tableData.length;
-                // 初始化显示，小于每页显示条数，全显，大于每页显示条数，取前每页条数显示
-                if(this.itemCount < this.pageSize){
-                    this.displayData = this.tableData;
-                }else{
-                    this.displayData = this.tableData.slice(0,this.pageSize);
+            //当搜索框为空时自动返回所有数据
+            emptySearch(value){
+                if(!value){
+                    this.operateData = this.tableData.slice(0);
+                    // 重新排序
+                    this.sortChange();
                 }
+            },
+            // 数据初始化
+			initData(){
+                // this.itemCount = this.tableData.length;
+                this.operateData = this.tableData.slice(0);
 			},
 			compare(prop,order) {
 			    return function (obj1, obj2) {
@@ -297,29 +191,30 @@
 			                   
 			    } 
 			},
+            // 排序
 			sortChange(obj){
-				var key = obj.key;
-				var order = obj.order;
-				this.tableData.sort(this.compare(key,order));
-				this.changePage();
+                if(obj){
+                    this.key = obj.key;
+                    if(obj.order!=='normal'){
+                        this.order = obj.order;
+                    }
+                }
+				this.operateData.sort(this.compare(this.key,this.order));
 			},
+            // 翻页
 			changePage(index){
-				if(index){
-					this.pageNum = index;
-				}
-				var _start = ( this.pageNum - 1 ) * this.pageSize;
-                var _end = this.pageNum * this.pageSize;
-                this.displayData = this.tableData.slice(_start,_end);
+                this.pageNum = index;
+                window.scrollTo(0, 0);
 			},
+            // 修改每页显示条数
 			changePageSize(size){
 				this.pageSize = size;
 				this.pageNum = 1;
-				this.changePage();
 				window.scrollTo(0, 0);
 			},
+            // 添加用户
 			addUser(){
 				this.isPop = true;
-				console.log(this.$refs.tagHtml);
 				document.getElementsByTagName('html')[0].style.overflow = 'hidden';
 			},
 			Close(popShow){
@@ -341,14 +236,33 @@
 				background-color: @wihteBackColor;
 				padding-bottom: 14px;
 				.add-user{
+                    margin-top: 4px;
 					margin-left: 10px;
+                    height: 40px;
+                    line-height: 26px;
+                    font-size: 16px;
 				}
 				.search{
 					width: 300px;
 					margin-right: 30px;
-					.ivu-input{
-						height: 44px;
+                    padding: 3px 42px 3px 8px;
+                    border:1px solid #c0c0c0;
+                    border-radius: 3px;
+					input{
+                        width: 100%;
+						height: 36px;
 					}
+                    .search-btn{
+                        top: 0;
+                        right: 0;
+                        width: 42px;
+                        line-height: 42px;
+                        font-size: 22px;
+                        background-color: @backgroundColor;
+                        &:hover{
+                            background-color: #ccc;
+                        }
+                    }
 				}
 			}
 		}
