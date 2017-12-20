@@ -39,6 +39,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   // these devServer options should be customized in /config/index.js
   devServer: {
     before(app){
+      // 搜索
       app.get('/api/tableData', (req, res) => {
         var  sql = 'SELECT * FROM person';
         connection.query(sql,function (err, result) {
@@ -49,10 +50,31 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           res.json({data:result}); 
         });
       }),
-      apiRoutes.post('/api/deleteItem', function (req, res) { //注意这里改为post就可以了
-        var delSql = 'DELETE FROM person where id=6';
+      // 修改
+      apiRoutes.patch('/api/alterItem', function (req, res) { //注意这里改为post就可以了
+        console.log(req.body);
+        // var modSql = 'UPDATE person SET name = ?,url = ? WHERE Id = ?';
+        // var modSqlParams = ['菜鸟移动站', 'https://m.runoob.com',6];
         res.json({
-          // error: 0,
+          error: 0
+          // data: foods
+        });
+      }),
+      // 新增
+      apiRoutes.post('/api/insertItem', function (req, res) { //注意这里改为post就可以了
+        var insertSql = 'INSERT INTO person(id,name,IDcard,department,station,age,sex) VALUES(?,?,?,?,?,?,?)';
+        console.log(req.body);
+        res.json({
+          error: 1
+          // data: foods
+        });
+      }),
+      // 删除
+      apiRoutes.delete('/api/deleteItem', function (req, res) { //注意这里改为post就可以了
+        // var deltSql = 'DELETE FROM person where id=6';
+        console.log(req.body);
+        res.json({
+          error: 2
           // data: foods
         });
       })

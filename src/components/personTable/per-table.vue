@@ -18,7 +18,7 @@
 				<Page :total="itemCount" :current='pageNum' :page-size="pageSize" :page-size-opts='opts' placement='top' show-total show-elevator show-sizer @on-change="changePage" @on-page-size-change='changePageSize'></Page>
 			</div>
 		</div>
-		<pop-panel v-show='isPop' :pop='isPop' @closePanel='Close'></pop-panel>
+		<pop-panel v-if='isPop' :pop='isPop' :Poptitle='title' :userInfo='userObj' @closePanel='Close'></pop-panel>
 	</div>
 </template>
 
@@ -29,6 +29,8 @@
 		data(){
 			return{
 				isPop:false,
+                title:'',
+                userObj:{},
 				searchValue:'',//搜索的值
 				operateData:[],//可进行操作的数据
 				pageSize:10,//当前每页展示的条数
@@ -95,7 +97,11 @@
                                     },
                                     on: {
                                         click: () => {
-                                            console.log(params.index);
+                                            this.title = '用户编辑';
+                                            this.userObj = {'haveData':true,'data':params.row};
+                                            this.isPop = true;
+                                            document.getElementsByTagName('html')[0].style.overflow = 'hidden';
+                                            // console.log(params);
                                         }
                                     }
                                 }, '编辑'),
@@ -214,6 +220,8 @@
 			},
             // 添加用户
 			addUser(){
+                this.title = '添加用户';
+                this.userObj = {'haveData':false,'data':{}};
 				this.isPop = true;
 				document.getElementsByTagName('html')[0].style.overflow = 'hidden';
 			},

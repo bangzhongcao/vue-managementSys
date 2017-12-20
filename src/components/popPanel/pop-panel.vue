@@ -2,37 +2,41 @@
 	<div class="pop p-f d-f">
 		<div class="panel">
 			<h1 class='title ta-l'>
-				<span>添加用户</span>
+				<span>{{Poptitle}}</span>
 				<i class="f-r c-p ivu-icon ivu-icon-close" @click='closePanel'></i>
 			</h1>
 			<div class="pop-content">
 				<Form ref="formValidate" class='popForm' :model="formValidate" :rules="ruleValidate" :label-width="80">
 					<FormItem label="工号" prop="id">
-			            <Input type='number' v-model="formValidate.id" placeholder="请输入工号"></Input>
+			            <Input size='large' v-model="formValidate.id" placeholder="请输入工号"></Input>
 			        </FormItem>
 			        <FormItem label="姓名" prop="name">
-			            <Input type='text' v-model="formValidate.name" placeholder="请输入姓名"></Input>
+			            <Input size='large' v-model="formValidate.name" placeholder="请输入姓名"></Input>
 			        </FormItem>
-			        <FormItem label="身份证" prop="card">
-			            <Input type='text' v-model="formValidate.card" placeholder="请输入身份证号"></Input>
+			        <FormItem label="身份证" prop="IDcard">
+			            <Input size='large' v-model="formValidate.IDcard" placeholder="请输入身份证号"></Input>
 			        </FormItem>
-			        <FormItem label="部门" prop="depart">
-			            <Select v-model="formValidate.depart" placeholder="请选择部门">
-			                <Option v-for='item in departments' :value="item">{{item}}</Option>
+			        <FormItem label="部门" prop="department">
+			            <Select size='large' v-model="formValidate.department" placeholder="请选择部门">
+			                <Option v-for='item in departments' :key='item' :value="item">{{item}}</Option>
+			                <!-- <Option value='beijing'>北京</Option> -->
 			            </Select>
 			        </FormItem>
 			        <FormItem label="岗位" prop="station">
-			            <Input type='text' v-model="formValidate.station" placeholder="请输入岗位"></Input>
+			            <Input size='large' v-model="formValidate.station" placeholder="请输入岗位"></Input>
+			        </FormItem>
+			        <FormItem class='input-age' label="年龄" prop="age">
+			            <Input size='large' v-model="formValidate.age" placeholder="请输入年龄"></Input>
 			        </FormItem>
 			        <FormItem label="性别" prop="sex">
 			            <RadioGroup v-model="formValidate.sex">
-			                <Radio label="男">男</Radio>
-			                <Radio label="女">女</Radio>
+			                <Radio size='large' label="男">男</Radio>
+			                <Radio size='large' label="女">女</Radio>
 			            </RadioGroup>
 			        </FormItem>
-			        <FormItem class='btn-group'>
-			            <Button type="primary" @click="handleSubmit('formValidate')">Submit</Button>
-			            <Button type="ghost" @click="handleReset('formValidate')" style="margin-left: 8px">Reset</Button>
+			        <FormItem class='btn-group ta-c'>
+			            <Button size='large' type="primary" @click="handleSubmit('formValidate')">提交</Button>
+			            <Button size='large' type="ghost" @click="handleReset('formValidate')" style="margin-left: 8px">重置</Button>
 			        </FormItem>
 			    </Form>
 			</div>
@@ -42,35 +46,61 @@
 
 <script>
 	export default {
-		props:['pop'],
+		props:['pop','Poptitle','userInfo'],
 		data(){
+			//定义工号规则
+			const validateID = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('工号不能为空'));
+                } else if(isNaN(Number(value))){
+                    callback(new Error('工号只能是数字'));
+                }else{
+                	callback();
+                }
+            };
+            //定义年龄规则
+            const validateAge = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('年龄不能为空'));
+                } else if(isNaN(Number(value))){
+                    callback(new Error('年龄只能是数字'));
+                }else if(Number(value)<=0||Number(value)>=100){
+                	callback(new Error('年龄应该在合理范围内'));
+                }else{
+                	callback();
+                }
+            };
 			return{
 				showPop:this.pop,
 				departments:['总工办','核心与运营开发处','公司业务开发处','零售业务开发处','电子渠道开发处','网络金融开发处','技术平台开发处','管理信息开发处','测试规划及管理处','系统测试处','业务测试处','综合管理处'],
 				formValidate: {
 					id:'',
                     name: '',
-                    card: '',
-                    depart: '',
+                    IDcard: '',
+                    department: '',
                     station:'',
+                    age:'',
                     sex: ''
                 },
                 ruleValidate: {
                 	id: [
-                        { required: true, message: '工号不能为空', trigger: 'blur' }
+                        { required: true,validator:validateID, trigger: 'blur' }
                     ],
                     name: [
                         { required: true, message: '姓名不能为空', trigger: 'blur' }
                     ],
-                    card: [
+                    IDcard: [
                         { required: true, message: '身份证不能为空', trigger: 'blur' }
                         // { type: 'email', message: 'Incorrect email format', trigger: 'blur' }
                     ],
-                    depart: [
+                    department: [
                         { required: true, message: '部门不能为空', trigger: 'change' }
                     ],
                     station: [
                         { required: true, message: '岗位不能为空', trigger: 'change' }
+                    ],
+                    age: [
+                        { required: true,validator:validateAge, trigger: 'blur' }
                     ],
                     sex: [
                         { required: true, message: '性别不能为空', trigger: 'change' }
@@ -78,13 +108,43 @@
                 }
 			}
 		},
+		mounted(){
+			var userData = this.userInfo['data'];
+			if(this.userInfo.haveData){
+				for(var key in this.formValidate){
+					if(key==='id'||key==='age'){
+						this.formValidate[key] = String(userData[key]);
+					}else{
+						this.formValidate[key] = userData[key];
+					}
+				}
+			}
+		},
 		methods:{
 			closePanel(){
-				console.log(352);
 				this.showPop = false;
 				this.$emit('closePanel',this.showPop);
 			},
 			handleSubmit (name) {
+				// 整理数据
+				var data = [];
+				for(var k in this.formValidate){
+					if(k==='id'||k==='age'){
+						data.push(Number(this.formValidate[k]));
+					}else{
+						data.push(this.formValidate[k]);
+					}
+				}
+				// 判断是新增用户还是编辑用户
+				if(this.userInfo.haveData){
+					this.$http.patch('/api/alterItem',data).then(function(res){
+						console.log(res);
+					})
+				}else{
+					this.$http.post('/api/insertItem',data).then(function(res){
+						console.log(res);
+					})
+				}
                 this.$refs[name].validate((valid) => {
                     if (valid) {
                         this.$Message.success('Success!');
@@ -113,7 +173,7 @@
 		align-items:center;
 		.panel{
 			width: 45%;
-			max-height: 500px;
+			max-height: 520px;
 			padding: 15px 20px;
 			border-radius: 5px;
 			background-color: @wihteBackColor;
@@ -127,12 +187,15 @@
 				}
 			}
 			.pop-content{
-				max-height: 400px;
+				max-height: 420px;
 				margin: 15px 0;
 				overflow: auto;
 				.popForm{
 					width: 80%;
 					margin: 0 auto;
+					.input-age{
+						width: 240px;
+					}
 					.btn-group{
 						margin: 0;
 					}
