@@ -10,7 +10,7 @@ import 'common/less/index.less';
 Vue.use(iview);
 Vue.use(resource);
 Vue.config.productionTip = false;
-
+// Vue.http.options.emulateJSON = true;
 /* eslint-disable no-new */
 window.vm = new Vue({
   el: '#app',

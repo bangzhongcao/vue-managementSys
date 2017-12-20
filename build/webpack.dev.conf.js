@@ -16,7 +16,16 @@ const mysql = require('mysql');
 const express = require('express')
 // 创建node.js的express开发框架的实例
 const app = express();
- 
+
+var bodyParser = require('body-parser');
+// var multer = require('multer'); 
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+// app.use(multer()); // for parsing multipart/form-data
+
+// var multipart = require('connect-multiparty');
+// var multipartMiddleware = multipart();
+// 连接数据库配置
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
@@ -26,8 +35,6 @@ var connection = mysql.createConnection({
  
 connection.connect();
 
-var apiRoutes = express.Router();
-app.use('/api', apiRoutes);
 
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -41,41 +48,82 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     before(app){
       // 搜索
       app.get('/api/tableData', (req, res) => {
-        var  sql = 'SELECT * FROM person';
+        var  sql = 'SELECT * FROM userinfo';
         connection.query(sql,function (err, result) {
           if(err){
-            console.log('[SELECT ERROR] - ',err.message);
+            res.json({data:err.message});
             return;
           }
           res.json({data:result}); 
         });
       }),
       // 修改
-      apiRoutes.patch('/api/alterItem', function (req, res) { //注意这里改为post就可以了
-        console.log(req.body);
-        // var modSql = 'UPDATE person SET name = ?,url = ? WHERE Id = ?';
-        // var modSqlParams = ['菜鸟移动站', 'https://m.runoob.com',6];
-        res.json({
-          error: 0
-          // data: foods
-        });
+      app.post('/api/alterItem', (req, res,next)=> {
+        var modSqlParams = [];
+        var str="";
+        req.on("data",function(chunk){
+          str+=chunk;     
+        })
+        req.on("end",function(){
+          var jsonData = JSON.parse(str);
+          for(var k in jsonData){
+            modSqlParams.push(jsonData[k]);
+          }
+          var id = modSqlParams.shift();
+          modSqlParams.push(id);
+          var modSql = 'UPDATE userinfo SET userName = ?,IDcard = ?,userDepartment = ?,userStation = ?,userAge = ?,userSex = ? WHERE userId = ?';
+          connection.query(modSql,modSqlParams,(err, result)=> {
+            if(err){
+              console.log('[UPDATE ERROR] - ',err.message);
+              return;
+            }
+            res.json({
+              error: 0
+            });
+          });
+        })
+        
       }),
       // 新增
-      apiRoutes.post('/api/insertItem', function (req, res) { //注意这里改为post就可以了
-        var insertSql = 'INSERT INTO person(id,name,IDcard,department,station,age,sex) VALUES(?,?,?,?,?,?,?)';
-        console.log(req.body);
-        res.json({
-          error: 1
-          // data: foods
+      app.post('/api/addItem', (req, res)=> { 
+        var str="";
+        req.on("data",function(chunk){
+          str+=chunk;     
+        });
+        req.on("end",function(){
+          var addSqlParams = JSON.parse(str);
+          connection.query('insert into userinfo set ?',addSqlParams,function (err, result) {
+              if(err){
+               console.log('[INSERT ERROR] - ',err.message);
+               return;
+              }          
+              res.json({
+                error: 1
+                // data: foods
+              });
+          });
         });
       }),
       // 删除
-      apiRoutes.delete('/api/deleteItem', function (req, res) { //注意这里改为post就可以了
-        // var deltSql = 'DELETE FROM person where id=6';
-        console.log(req.body);
-        res.json({
-          error: 2
-          // data: foods
+      app.post('/api/deleteItem', (req, res)=> {
+        var str="";
+        req.on("data",function(chunk){
+          str+=chunk;     
+        });
+        req.on("end",function(){
+          var jsonData = JSON.parse(str);
+          var deltSql = 'DELETE FROM userinfo where userId=?';
+          var deleteSqlParams=[jsonData['userId']];
+          connection.query(deltSql,deleteSqlParams,function (err, result) {
+              if(err){
+                console.log('[INSERT ERROR] - ',err.message);
+                return;
+              }          
+              res.json({
+                error: 3
+                // data: foods
+              });
+          });
         });
       })
     },

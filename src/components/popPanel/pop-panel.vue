@@ -7,29 +7,29 @@
 			</h1>
 			<div class="pop-content">
 				<Form ref="formValidate" class='popForm' :model="formValidate" :rules="ruleValidate" :label-width="80">
-					<FormItem label="工号" prop="id">
-			            <Input size='large' v-model="formValidate.id" placeholder="请输入工号"></Input>
+					<FormItem label="工号" prop="userId">
+			            <Input number size='large' v-model="formValidate.userId" placeholder="请输入工号"></Input>
 			        </FormItem>
-			        <FormItem label="姓名" prop="name">
-			            <Input size='large' v-model="formValidate.name" placeholder="请输入姓名"></Input>
+			        <FormItem label="姓名" prop="userName">
+			            <Input size='large' v-model="formValidate.userName" placeholder="请输入姓名"></Input>
 			        </FormItem>
 			        <FormItem label="身份证" prop="IDcard">
 			            <Input size='large' v-model="formValidate.IDcard" placeholder="请输入身份证号"></Input>
 			        </FormItem>
-			        <FormItem label="部门" prop="department">
-			            <Select size='large' v-model="formValidate.department" placeholder="请选择部门">
+			        <FormItem label="部门" prop="userDepartment">
+			            <Select size='large' v-model="formValidate.userDepartment" placeholder="请选择部门">
 			                <Option v-for='item in departments' :key='item' :value="item">{{item}}</Option>
 			                <!-- <Option value='beijing'>北京</Option> -->
 			            </Select>
 			        </FormItem>
-			        <FormItem label="岗位" prop="station">
-			            <Input size='large' v-model="formValidate.station" placeholder="请输入岗位"></Input>
+			        <FormItem label="岗位" prop="userStation">
+			            <Input size='large' v-model="formValidate.userStation" placeholder="请输入岗位"></Input>
 			        </FormItem>
-			        <FormItem class='input-age' label="年龄" prop="age">
-			            <Input size='large' v-model="formValidate.age" placeholder="请输入年龄"></Input>
+			        <FormItem class='input-age' label="年龄" prop="userAge">
+			            <Input number size='large' v-model="formValidate.userAge" placeholder="请输入年龄"></Input>
 			        </FormItem>
-			        <FormItem label="性别" prop="sex">
-			            <RadioGroup v-model="formValidate.sex">
+			        <FormItem label="性别" prop="userSex">
+			            <RadioGroup v-model="formValidate.userSex">
 			                <Radio size='large' label="男">男</Radio>
 			                <Radio size='large' label="女">女</Radio>
 			            </RadioGroup>
@@ -74,35 +74,35 @@
 				showPop:this.pop,
 				departments:['总工办','核心与运营开发处','公司业务开发处','零售业务开发处','电子渠道开发处','网络金融开发处','技术平台开发处','管理信息开发处','测试规划及管理处','系统测试处','业务测试处','综合管理处'],
 				formValidate: {
-					id:'',
-                    name: '',
+					userId:'',
+                    userName: '',
                     IDcard: '',
-                    department: '',
-                    station:'',
-                    age:'',
-                    sex: ''
+                    userDepartment: '',
+                    userStation:'',
+                    userAge:'',
+                    userSex: ''
                 },
                 ruleValidate: {
-                	id: [
+                	userId: [
                         { required: true,validator:validateID, trigger: 'blur' }
                     ],
-                    name: [
+                    userName: [
                         { required: true, message: '姓名不能为空', trigger: 'blur' }
                     ],
                     IDcard: [
                         { required: true, message: '身份证不能为空', trigger: 'blur' }
                         // { type: 'email', message: 'Incorrect email format', trigger: 'blur' }
                     ],
-                    department: [
+                    userDepartment: [
                         { required: true, message: '部门不能为空', trigger: 'change' }
                     ],
-                    station: [
+                    userStation: [
                         { required: true, message: '岗位不能为空', trigger: 'change' }
                     ],
-                    age: [
+                    userAge: [
                         { required: true,validator:validateAge, trigger: 'blur' }
                     ],
-                    sex: [
+                    userSex: [
                         { required: true, message: '性别不能为空', trigger: 'change' }
                     ]
                 }
@@ -112,11 +112,7 @@
 			var userData = this.userInfo['data'];
 			if(this.userInfo.haveData){
 				for(var key in this.formValidate){
-					if(key==='id'||key==='age'){
-						this.formValidate[key] = String(userData[key]);
-					}else{
-						this.formValidate[key] = userData[key];
-					}
+					this.formValidate[key] = userData[key];
 				}
 			}
 		},
@@ -126,23 +122,16 @@
 				this.$emit('closePanel',this.showPop);
 			},
 			handleSubmit (name) {
-				// 整理数据
-				var data = [];
-				for(var k in this.formValidate){
-					if(k==='id'||k==='age'){
-						data.push(Number(this.formValidate[k]));
-					}else{
-						data.push(this.formValidate[k]);
-					}
-				}
 				// 判断是新增用户还是编辑用户
-				if(this.userInfo.haveData){
-					this.$http.patch('/api/alterItem',data).then(function(res){
+				if(this.userInfo.haveData){//编辑
+					this.$http.post('/api/alterItem',this.formValidate).then(res=>{
 						console.log(res);
+						this.$emit('operateData','alter',true,this.formValidate);					
 					})
-				}else{
-					this.$http.post('/api/insertItem',data).then(function(res){
+				}else{//新增
+					this.$http.post('/api/addItem',this.formValidate).then(res=>{
 						console.log(res);
+						this.$emit('operateData','add',true,this.formValidate);		
 					})
 				}
                 this.$refs[name].validate((valid) => {

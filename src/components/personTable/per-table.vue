@@ -3,7 +3,7 @@
 		<div class="table-tab">
 			<div class="operate-tab">
 				<Button type="primary" class='f-l add-user' icon="plus" @click='addUser'>新增用户</Button>
-                <div class="search f-r p-r">
+                <div class="search f-r p-r ta-c">
                     <input type="text" v-model="searchValue" @keyup.enter='handleSearch(searchValue)' @input='emptySearch(searchValue)' placeholder='Search'>
                     <i class="search-btn p-a c-p ivu-icon ivu-icon-ios-search" @click='handleSearch(searchValue)'></i>
                 </div>
@@ -18,7 +18,7 @@
 				<Page :total="itemCount" :current='pageNum' :page-size="pageSize" :page-size-opts='opts' placement='top' show-total show-elevator show-sizer @on-change="changePage" @on-page-size-change='changePageSize'></Page>
 			</div>
 		</div>
-		<pop-panel v-if='isPop' :pop='isPop' :Poptitle='title' :userInfo='userObj' @closePanel='Close'></pop-panel>
+		<pop-panel v-if='isPop' :pop='isPop' :Poptitle='title' :userInfo='userObj' @closePanel='Close' @operateData='handleData'></pop-panel>
 	</div>
 </template>
 
@@ -41,14 +41,14 @@
 				columns: [
                     {
                         title: '工号',
-                        key: 'id',
+                        key: 'userId',
                         width:100,
                         sortable: 'custom',
                         sortType:'asc'
                     },
                     {
                         title: '姓名',
-                        key: 'name',
+                        key: 'userName',
                         width:150,
                         sortable: 'custom'
                     },
@@ -60,23 +60,23 @@
                     },
                     {
                         title: '部门',
-                        key: 'department',
+                        key: 'userDepartment',
                         sortable: 'custom'
                     },
                     {
                         title: '岗位',
-                        key: 'station',
+                        key: 'userStation',
                         sortable: 'custom'
                     },
                     {
                         title: '年龄',
-                        key: 'age',
+                        key: 'userAge',
                         width:100,
                         sortable: 'custom'
                     },
                     {
                         title: '性别',
-                        key: 'sex',
+                        key: 'userSex',
                         width:100,
                         sortable: 'custom'
                     },
@@ -99,6 +99,7 @@
                                         click: () => {
                                             this.title = '用户编辑';
                                             this.userObj = {'haveData':true,'data':params.row};
+                                            console.log(params.row);
                                             this.isPop = true;
                                             document.getElementsByTagName('html')[0].style.overflow = 'hidden';
                                             // console.log(params);
@@ -113,7 +114,9 @@
                                     on: {
                                         click: () => {
                                             this.operateData.splice(params.index,1);
-                                            // this.$http.post('')
+                                            this.$http.post('/api/deleteItem',params.row).then(res=>{
+                                                console.log(res);
+                                            })
                                         }
                                     }
                                 }, '删除')
@@ -228,7 +231,31 @@
 			Close(popShow){
 				this.isPop = popShow;
 				document.getElementsByTagName('html')[0].style.overflow = 'auto';
-			}
+			},
+            // 对操作后的数据进行处理
+            handleData(op,flag,obj){
+                if(op==='add'){
+                    console.log(obj);
+                    this.operateData.push(obj);
+                    this.tableData.push(obj);
+                    this.sortChange();
+                    this.isPop = false;
+                }else{
+                    console.log(obj);
+                    this.$http.get('/api/tableData').then(function(res){
+                        this.tableData = res.body.data;
+                    });
+                    for(var i in this.operateData){
+                        if(this.operateData[i].userId===obj.userId){
+                            this.operateData.splice(i,1);
+                            this.operateData.push(obj);
+                            break;
+                        }                      
+                    }
+                    this.sortChange();
+                    this.isPop = false;
+                }
+            }
 		}
 	}
 </script>
