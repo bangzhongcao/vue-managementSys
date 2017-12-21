@@ -4,14 +4,16 @@
 			<Icon type="ios-analytics va-m"></Icon>
 			<span class='va-m'>Management Systerm</span>
 		</div>
-		<div class="right-tab">
+		<div class="right-tab" v-if='showTab'>
 			<Menu mode="horizontal" class='user-info f-r'>
 				<Submenu name="1">
 		            <template slot="title">
 		                <Icon type="person"></Icon>
-		                <span>曹邦中</span>
+		                <span>admin</span>
 		            </template>
-	                <MenuItem name="1-1">退出</MenuItem>
+	                <MenuItem name="1-1">
+	                	<li @click='loginOut'>退出</li>
+	                </MenuItem>
 		        </Submenu>
 	    	</Menu>
 		</div>
@@ -19,7 +21,21 @@
 </template>
 
 <script>
-	export default{}
+	export default{
+		props:['isShow'],
+		data(){
+			return{
+				showTab:this.isShow
+			}
+		},
+		methods:{
+			loginOut(){
+				this.showTab = false;
+				sessionStorage.removeItem('loginSession');
+				this.$router.push('/login');
+			}
+		}
+	}
 </script>
 
 <style scoped lang='less'>

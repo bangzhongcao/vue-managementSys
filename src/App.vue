@@ -1,17 +1,20 @@
 <template>
   <div id="app">
-    <m-header></m-header>
     <!-- <Table :columns="columns1" :data="data1"></Table> -->
     <router-view></router-view>
   </div>
 </template>
 
 <script>
-import Mheader from 'components/Header/header';
-
 export default {
   name: 'app',
-  components:{'m-header':Mheader}
+  created(){
+    if(sessionStorage.getItem('loginSession')){
+      this.$router.push('/table');
+    }else{
+      this.$router.push('/login');
+    }
+  }
 }
 </script>
 

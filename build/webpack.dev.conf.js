@@ -46,6 +46,35 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   // these devServer options should be customized in /config/index.js
   devServer: {
     before(app){
+      // 登录
+      app.post('/api/login', (req, res) => {
+        var str="";
+        req.on("data",function(chunk){
+          str+=chunk;     
+        });
+        req.on("end",function(){
+          var loginData = JSON.parse(str);
+          var  sql = 'SELECT * FROM admins';
+          connection.query(sql,function (err, result) {
+            if(err){
+              res.json({status:false,msg:err.message});
+            }else{
+              for(var i in result){
+                if(result[i].AdminName===loginData.Name&&result[i].AdminPass===loginData.Pass){
+                  var session=""; 
+                  for(var i=0;i<6;i++) { 
+                    session+=Math.floor(Math.random()*10); 
+                  } 
+                  res.json({status:true,session:session});
+                }else{
+                  res.json({status:false,msg:'账号或密码不正确'});
+                }
+              }
+            }
+          });
+        });
+        
+      }),
       // 搜索
       app.get('/api/tableData', (req, res) => {
         var  sql = 'SELECT * FROM userinfo';
@@ -74,15 +103,17 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           var modSql = 'UPDATE userinfo SET userName = ?,IDcard = ?,userDepartment = ?,userStation = ?,userAge = ?,userSex = ? WHERE userId = ?';
           connection.query(modSql,modSqlParams,(err, result)=> {
             if(err){
-              console.log('[UPDATE ERROR] - ',err.message);
-              return;
+              res.json({
+                status:false,
+                msg:err.message
+              });
+            }else{
+              res.json({
+                status: true
+              });
             }
-            res.json({
-              error: 0
-            });
           });
-        })
-        
+        });
       }),
       // 新增
       app.post('/api/addItem', (req, res)=> { 
@@ -94,13 +125,15 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           var addSqlParams = JSON.parse(str);
           connection.query('insert into userinfo set ?',addSqlParams,function (err, result) {
               if(err){
-               console.log('[INSERT ERROR] - ',err.message);
-               return;
-              }          
-              res.json({
-                error: 1
-                // data: foods
-              });
+                res.json({
+                  status:false,
+                  msg:err.message
+                });
+              }else{
+                res.json({
+                  status: true
+                });
+              }
           });
         });
       }),
@@ -116,16 +149,18 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           var deleteSqlParams=[jsonData['userId']];
           connection.query(deltSql,deleteSqlParams,function (err, result) {
               if(err){
-                console.log('[INSERT ERROR] - ',err.message);
-                return;
-              }          
-              res.json({
-                error: 3
-                // data: foods
-              });
+                res.json({
+                  status:false,
+                  msg:err.message
+                });
+              }else{
+                res.json({
+                  status: true
+                });
+              }   
           });
         });
-      })
+      });
     },
     clientLogLevel: 'warning',
     historyApiFallback: true,

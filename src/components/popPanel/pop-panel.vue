@@ -7,7 +7,10 @@
 			</h1>
 			<div class="pop-content">
 				<Form ref="formValidate" class='popForm' :model="formValidate" :rules="ruleValidate" :label-width="80">
-					<FormItem label="工号" prop="userId">
+					<FormItem v-if='this.userInfo.haveData' label="工号" prop="userId">
+			            <Input readonly number size='large' v-model="formValidate.userId" placeholder="请输入工号"></Input>
+			        </FormItem>
+			        <FormItem v-if='!this.userInfo.haveData' label="工号" prop="userId">
 			            <Input number size='large' v-model="formValidate.userId" placeholder="请输入工号"></Input>
 			        </FormItem>
 			        <FormItem label="姓名" prop="userName">
@@ -19,7 +22,6 @@
 			        <FormItem label="部门" prop="userDepartment">
 			            <Select size='large' v-model="formValidate.userDepartment" placeholder="请选择部门">
 			                <Option v-for='item in departments' :key='item' :value="item">{{item}}</Option>
-			                <!-- <Option value='beijing'>北京</Option> -->
 			            </Select>
 			        </FormItem>
 			        <FormItem label="岗位" prop="userStation">
@@ -125,22 +127,31 @@
 				// 判断是新增用户还是编辑用户
 				if(this.userInfo.haveData){//编辑
 					this.$http.post('/api/alterItem',this.formValidate).then(res=>{
-						console.log(res);
-						this.$emit('operateData','alter',true,this.formValidate);					
+						if(res.body.status){
+							this.$emit('operateData','alter',true,this.formValidate);
+						}else{
+							this.$Message.error({
+	                            content: '修改用户'+this.formValidate.userName+'的信息失败！'+res.body.msg,
+	                            closable:true,
+	                            top:300,
+	                            duration:15
+	                        });
+						}				
 					})
 				}else{//新增
 					this.$http.post('/api/addItem',this.formValidate).then(res=>{
-						console.log(res);
-						this.$emit('operateData','add',true,this.formValidate);		
+						if(res.body.status){
+							this.$emit('operateData','add',true,this.formValidate);	
+						}else{
+							this.$Message.error({
+	                            content: '添加用户'+this.formValidate.userName+'的信息失败！'+res.body.msg,
+	                            closable:true,
+	                            top:300,
+	                            duration:15
+	                        });
+						}	
 					})
 				}
-                this.$refs[name].validate((valid) => {
-                    if (valid) {
-                        this.$Message.success('Success!');
-                    } else {
-                        this.$Message.error('Fail!');
-                    }
-                })
             },
             handleReset (name) {
                 this.$refs[name].resetFields();

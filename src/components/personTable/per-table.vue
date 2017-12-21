@@ -1,5 +1,6 @@
 <template>
 	<div class="per-table">
+        <m-header :isShow='showTab'></m-header>
 		<div class="table-tab">
 			<div class="operate-tab">
 				<Button type="primary" class='f-l add-user' icon="plus" @click='addUser'>新增用户</Button>
@@ -19,15 +20,35 @@
 			</div>
 		</div>
 		<pop-panel v-if='isPop' :pop='isPop' :Poptitle='title' :userInfo='userObj' @closePanel='Close' @operateData='handleData'></pop-panel>
+
+        <Modal v-model="modal" width="360">
+            <p slot="header" class='ta-c'style="color:#f60;">
+                <Icon type="information-circled"></Icon>
+                <span>删除用户</span>
+            </p>
+            <div style="text-align:center">
+                <p>工号：{{this.delUser.userId}},姓名：{{this.delUser.userName}}</p>
+                <p>你确定要删除这位员工信息吗?</p>
+            </div>
+            <div slot="footer" class='ta-c'>
+                <Button type="error" size='large' :loading="modal_loading" @click="del">确定</Button>
+                <Button type="ghost" size="large" @click="cancel">取消</Button>
+            </div>
+        </Modal>
 	</div>
 </template>
 
 <script>
+    import Mheader from 'components/Header/header';
 	import popPanel from 'components/popPanel/pop-panel';
 	export default{
-		components:{'pop-panel':popPanel},
+		components:{'m-header':Mheader,'pop-panel':popPanel},
 		data(){
 			return{
+                showTab:true,//是否显示右边登录信息
+                delUser:{},
+                modal:false,//删除提醒框
+                modal_loading: false,//删除按钮等待状态
 				isPop:false,
                 title:'',
                 userObj:{},
@@ -99,7 +120,7 @@
                                         click: () => {
                                             this.title = '用户编辑';
                                             this.userObj = {'haveData':true,'data':params.row};
-                                            console.log(params.row);
+                                            console.log(params.index);
                                             this.isPop = true;
                                             document.getElementsByTagName('html')[0].style.overflow = 'hidden';
                                             // console.log(params);
@@ -113,10 +134,8 @@
                                     },
                                     on: {
                                         click: () => {
-                                            this.operateData.splice(params.index,1);
-                                            this.$http.post('/api/deleteItem',params.row).then(res=>{
-                                                console.log(res);
-                                            })
+                                            this.delUser = params.row;
+                                            this.modal = true;
                                         }
                                     }
                                 }, '删除')
@@ -155,7 +174,6 @@
                         }
                     }
                 });
-                console.log(this.operateData);
                 // 重新排序
                 this.sortChange();
 			},
@@ -228,6 +246,7 @@
 				this.isPop = true;
 				document.getElementsByTagName('html')[0].style.overflow = 'hidden';
 			},
+            // 关闭弹窗
 			Close(popShow){
 				this.isPop = popShow;
 				document.getElementsByTagName('html')[0].style.overflow = 'auto';
@@ -235,16 +254,22 @@
             // 对操作后的数据进行处理
             handleData(op,flag,obj){
                 if(op==='add'){
-                    console.log(obj);
                     this.operateData.push(obj);
                     this.tableData.push(obj);
-                    this.sortChange();
-                    this.isPop = false;
-                }else{
-                    console.log(obj);
-                    this.$http.get('/api/tableData').then(function(res){
-                        this.tableData = res.body.data;
+                    // 判断是否在搜索状态
+                    if(this.searchValue){
+                        this.handleSearch(this.searchValue);
+                    }else{
+                        this.sortChange();
+                    }
+                    this.$Message.success({
+                        content:'工号'+obj.userId+' 的用户信息添加成功',
+                        top:300,
+                        duration:5
                     });
+                    this.isPop = false;
+                    document.getElementsByTagName('html')[0].style.overflow = 'auto';
+                }else{
                     for(var i in this.operateData){
                         if(this.operateData[i].userId===obj.userId){
                             this.operateData.splice(i,1);
@@ -252,9 +277,61 @@
                             break;
                         }                      
                     }
-                    this.sortChange();
-                    this.isPop = false;
+                    this.$http.get('/api/tableData').then(function(res){
+                        this.tableData = res.body.data;
+                        this.sortChange();
+                        this.$Message.success({
+                            content:'工号'+obj.userId+' 的用户信息修改成功',
+                            top:300,
+                            duration:5
+                        });
+                        this.isPop = false;
+                        document.getElementsByTagName('html')[0].style.overflow = 'auto';
+                    });
                 }
+            },
+            // 删除用户
+            del(){
+                this.modal_loading = true; 
+                this.$http.post('/api/deleteItem',this.delUser).then(res=>{
+                    // 删除成功
+                    if(res.body.status){
+                        // 先删除opearateData中的数据
+                        for(var i in this.operateData){
+                            if(this.operateData[i].userId===this.delUser.userId){
+                                this.operateData.splice(i,1);
+                            }
+                            break;
+                        }
+                        // 重新获取tableData
+                        this.$http.get('/api/tableData').then(function(res){
+                            this.tableData = res.body.data;
+                            this.modal = false;
+                            this.modal_loading = false; 
+                            this.$Message.success({
+                                content:'工号'+this.delUser.userId+' 的用户删除成功',
+                                top:300,
+                                duration:5
+                            });
+                            this.sortChange();
+                        });
+                        
+                    // 删除失败
+                    }else{
+                        this.modal = false;
+                        this.modal_loading = false; 
+                        this.$Message.error({
+                            content: '删除用户失败！'+res.body.msg,
+                            closable:true,
+                            top:300,
+                            duration:15
+                        });
+                    }
+                })
+            },
+            // 取消删除
+            cancel(){
+                this.modal = false;
             }
 		}
 	}
