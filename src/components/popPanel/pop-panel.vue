@@ -37,7 +37,7 @@
 			            </RadioGroup>
 			        </FormItem>
 			        <FormItem class='btn-group ta-c'>
-			            <Button size='large' type="primary" @click="handleSubmit('formValidate')">提交</Button>
+			            <Button size='large' type="success" @click="handleSubmit('formValidate')">提交</Button>
 			            <Button size='large' type="ghost" @click="handleReset('formValidate')" style="margin-left: 8px">重置</Button>
 			        </FormItem>
 			    </Form>
@@ -185,7 +185,7 @@
 		align-items:center;
 		.panel{
 			width: 45%;
-			max-height: 520px;
+			max-height: 560px;
 			padding: 15px 20px;
 			border-radius: 5px;
 			background-color: @wihteBackColor;
@@ -199,7 +199,7 @@
 				}
 			}
 			.pop-content{
-				max-height: 420px;
+				max-height: 460px;
 				margin: 15px 0;
 				overflow: auto;
 				.popForm{

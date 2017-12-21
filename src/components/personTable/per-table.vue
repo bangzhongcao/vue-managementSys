@@ -381,7 +381,7 @@
 		.tables{
 			padding: 10px 0;
 			.top-pagination{
-				padding: 15px;
+				padding: 10px;
 			}
 			.bottom-pagination{
 				padding:15px;
