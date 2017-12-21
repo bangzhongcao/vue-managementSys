@@ -5,12 +5,12 @@
 			<img src="../../assets/logo.png" alt="">
 		</div>
 		<Form class='loginForm' ref="formInline" :model="formInline" :rules="ruleInline">
-	        <FormItem prop="user">
+	        <FormItem prop="Name">
 	            <Input type="text" size='large' v-model="formInline.Name" placeholder="用户名">
 	                <Icon type="ios-person-outline" slot="prepend"></Icon>
 	            </Input>
 	        </FormItem>
-	        <FormItem prop="password">
+	        <FormItem prop="Pass">
 	            <Input type="password" size='large' v-model="formInline.Pass" placeholder="密码">
 	                <Icon type="ios-locked-outline" slot="prepend"></Icon>
 	            </Input>
@@ -45,16 +45,23 @@
         },
         methods: {
             handleSubmit(name) {
-            	this.$http.post('/api/login',this.formInline).then(res=>{
-            		if(res.body.status){
-            			this.showTab = true;
-            			sessionStorage.setItem('loginSession',res.body.session);
-            			this.$Message.success('登录成功!');
-            			this.$router.push('/table');
-            		}else{
-            			this.$Message.error(res.body.msg);
-            		}
-            	})
+            	this.$refs[name].validate((valid) => {
+                    if (valid) {
+                        this.$http.post('/api/login',this.formInline).then(res=>{
+		            		if(res.body.status){
+		            			this.showTab = true;
+		            			sessionStorage.setItem('loginSession',res.body.session);
+		            			this.$Message.success('登录成功!');
+		            			this.$router.push('/table');
+		            		}else{
+		            			this.$Message.error(res.body.msg);
+		            		}
+		            	});
+                    } else {
+                        this.$Message.error('Fail!');
+                    }
+                });
+            	
             }
         }
     }

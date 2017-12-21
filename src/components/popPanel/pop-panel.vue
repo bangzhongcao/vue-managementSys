@@ -126,31 +126,43 @@
 			handleSubmit (name) {
 				// 判断是新增用户还是编辑用户
 				if(this.userInfo.haveData){//编辑
-					this.$http.post('/api/alterItem',this.formValidate).then(res=>{
-						if(res.body.status){
-							this.$emit('operateData','alter',true,this.formValidate);
-						}else{
-							this.$Message.error({
-	                            content: '修改用户'+this.formValidate.userName+'的信息失败！'+res.body.msg,
-	                            closable:true,
-	                            top:300,
-	                            duration:15
-	                        });
-						}				
-					})
+					this.$refs[name].validate((valid) => {
+	                    if (valid) {
+	                        this.$http.post('/api/alterItem',this.formValidate).then(res=>{
+								if(res.body.status){
+									this.$emit('operateData','alter',true,this.formValidate);
+								}else{
+									this.$Message.error({
+			                            content: '修改用户'+this.formValidate.userName+'的信息失败！'+res.body.msg,
+			                            closable:true,
+			                            top:300,
+			                            duration:15
+			                        });
+								}				
+							});
+	                    } else {
+	                        this.$Message.error('Fail!');
+	                    }
+	                });
 				}else{//新增
-					this.$http.post('/api/addItem',this.formValidate).then(res=>{
-						if(res.body.status){
-							this.$emit('operateData','add',true,this.formValidate);	
-						}else{
-							this.$Message.error({
-	                            content: '添加用户'+this.formValidate.userName+'的信息失败！'+res.body.msg,
-	                            closable:true,
-	                            top:300,
-	                            duration:15
-	                        });
-						}	
-					})
+					this.$refs[name].validate((valid) => {
+	                    if (valid) {
+	                        this.$http.post('/api/addItem',this.formValidate).then(res=>{
+								if(res.body.status){
+									this.$emit('operateData','add',true,this.formValidate);	
+								}else{
+									this.$Message.error({
+			                            content: '添加用户'+this.formValidate.userName+'的信息失败！'+res.body.msg,
+			                            closable:true,
+			                            top:300,
+			                            duration:15
+			                        });
+								}	
+							});
+	                    } else {
+	                        this.$Message.error('Fail!');
+	                    }
+	                });
 				}
             },
             handleReset (name) {
