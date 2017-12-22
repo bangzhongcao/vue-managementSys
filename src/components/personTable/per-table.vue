@@ -120,7 +120,6 @@
                                         click: () => {
                                             this.title = '用户编辑';
                                             this.userObj = {'haveData':true,'data':params.row};
-                                            console.log(params.index);
                                             this.isPop = true;
                                             document.getElementsByTagName('html')[0].style.overflow = 'hidden';
                                             // console.log(params);
@@ -156,7 +155,12 @@
             CurrentData(){
                 var _start = ( this.pageNum - 1 ) * this.pageSize;
                 var _end = this.pageNum * this.pageSize;
-                return this.operateData.slice(_start,_end);
+                if(this.operateData.length<_end){
+                    return this.operateData;
+                }else{
+                    return this.operateData.slice(_start,_end);
+                }
+                
             },
             itemCount(){
                 return this.operateData.length;
@@ -174,6 +178,7 @@
                         }
                     }
                 });
+                console.log(this.operateData);
                 // 重新排序
                 this.sortChange();
 			},
