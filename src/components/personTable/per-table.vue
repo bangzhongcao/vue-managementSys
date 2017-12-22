@@ -58,7 +58,7 @@
 				pageNum:1,//当前在第几页
 				opts:[10,25,50],//每页条数切换的配置
                 key:'',//排序的关键字
-                order:'',//排序的升降序
+                order:'asc',//默认的排序的升降序
 				columns: [
                     {
                         title: '工号',
@@ -156,7 +156,7 @@
                 var _start = ( this.pageNum - 1 ) * this.pageSize;
                 var _end = this.pageNum * this.pageSize;
                 if(this.operateData.length<_end){
-                    return this.operateData;
+                    return this.operateData.slice(_start);
                 }else{
                     return this.operateData.slice(_start,_end);
                 }
@@ -170,6 +170,8 @@
             // 搜索功能
 			handleSearch(value){
                 var v = value.trim();
+                // 将页码重设为1
+                this.pageNum = 1;
                 this.operateData = this.tableData.filter(function(item){
                     // debugger
                     for(var key in item){
@@ -194,6 +196,7 @@
                 // this.itemCount = this.tableData.length;
                 this.operateData = this.tableData.slice(0);
 			},
+            // 排序函数
 			compare(prop,order) {
 			    return function (obj1, obj2) {
 			        var val1 = obj1[prop];
