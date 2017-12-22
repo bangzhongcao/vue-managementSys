@@ -178,7 +178,6 @@
                         }
                     }
                 });
-                console.log(this.operateData);
                 // 重新排序
                 this.sortChange();
 			},

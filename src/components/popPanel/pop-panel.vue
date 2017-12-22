@@ -36,10 +36,10 @@
 			                <Radio size='large' label="女">女</Radio>
 			            </RadioGroup>
 			        </FormItem>
-			        <FormItem class='btn-group ta-c'>
+			        <div class='btn-group ta-c'>
 			            <Button size='large' type="success" @click="handleSubmit('formValidate')">提交</Button>
-			            <Button size='large' type="ghost" @click="handleReset('formValidate')" style="margin-left: 8px">重置</Button>
-			        </FormItem>
+			            <Button v-if='!this.userInfo.haveData' size='large' type="ghost" @click="handleReset('formValidate')" style="margin-left: 8px">重置</Button>
+			        </div>
 			    </Form>
 			</div>
 		</div>
